@@ -7,7 +7,7 @@ export default defineComponent({
 	data() {
 		return {
 			incorrectAttempts: 0,
-			answer: "",
+			answer: "apple",
 			alphabet: Array.from({ length: 26 }, (_, index) =>
 				String.fromCharCode("A".charCodeAt(0) + index)
 			),
@@ -73,10 +73,30 @@ export default defineComponent({
 		<h1 class="mt-7 pt-6" v-on:click="drawHangman">행맨</h1>
 		<canvas ref="hangmanCanvas" width="300" height="300"></canvas>
 		<input type="text" v-model="answer" />
-		<button class="mx-5" v-for="letter in alphabet" :key="letter">
-			{{ letter }}
-		</button>
+		<div class="letter-box">
+			<button v-for="letter in alphabet" :key="letter">
+				{{ letter }}
+			</button>
+		</div>
 	</div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.letter-box {
+	display: flex;
+	justify-content: center;
+	grid-template-columns: repeat(auto-fit, minmax(10%, auto));
+	flex-wrap: wrap;
+	button {
+		margin: 1%;
+		display: block;
+		background-color: hsla(160, 100%, 37%, 0.4);
+		color: #fff;
+		padding: 14px 20px;
+		border-radius: 10px;
+		&:hover {
+			background-color: hsla(160, 100%, 37%, 1);
+		}
+	}
+}
+</style>
