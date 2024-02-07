@@ -1,6 +1,5 @@
 <script lang="ts">
 import { defineComponent } from "vue";
-import CAlert from '@/components/CAlert.vue';
 
 export interface IalphabetProps {
 	letter: string;
@@ -9,13 +8,10 @@ export interface IalphabetProps {
 
 export default defineComponent({
 	name: "Hanman",
-    components: {CAlert},
 	props: {},
 	data() {
-        const answerArr = ['apple', 'banana', 'Orange', 'Grape', 'Strawberry', 'Mango', 'Pineapple', 'Watermelon', 'cherry', 'kiwi'];
-        const answerI = Math.floor(Math.random() * answerArr.length);
-		const answer = answerArr[answerI].toUpperCase();
-		const answerTemp = Array.from(answer, () => '');
+		const answer = "APPLE";
+		const answerTemp = Array.from(answer).map((d) => "");
 		const alphabetArr = Array.from({ length: 26 }, (_, index) =>
 			String.fromCharCode("A".charCodeAt(0) + index)
 		).map((d) => {
@@ -24,16 +20,13 @@ export default defineComponent({
 				isPass: undefined,
 			};
 		});
+		console.log(alphabetArr);
 		return {
 			incorrectAttempts: 0,
 			answer: answer,
 			answerTemp: answerTemp,
 			alphabet: alphabetArr,
 			ctx: {} as any,
-            params: {
-                text: '정답입니다.',
-            },
-            isAlert: false,
 		};
 	},
 	mounted() {
@@ -115,28 +108,14 @@ export default defineComponent({
 				data.isPass = false;
 				this.incorrectAttempts++;
 				this.drawHangman();
-                if (this.incorrectAttempts === 8) {
-                    this.params.text = '실패했습니다.';
-                    this.isAlert = true;
-                }
-                return;
 			}
-
-            if (this.answerTemp.join('') === this.answer) {
-                this.isAlert = true;
-            }
 		},
 	},
 });
 </script>
 
 <template>
-    <CAlert
-        v-bind:params="params"
-        v-if="isAlert"
-        @confirm="isAlert = !$event"
-    />
-	<section>
+	<div>
 		<h1 class="mt-7 pt-6">행맨</h1>
 		<canvas
 			class="mx-auto"
@@ -168,7 +147,7 @@ export default defineComponent({
 				{{ d.letter }}
 			</button>
 		</div>
-	</section>
+	</div>
 </template>
 
 <style scoped>
