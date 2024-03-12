@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
-import CAlert from '@/components/CAlert.vue';
+import CAlert from "@/components/CAlert.vue";
 
 export interface IalphabetProps {
 	letter: string;
@@ -9,13 +9,25 @@ export interface IalphabetProps {
 
 export default defineComponent({
 	name: "Hanman",
-    components: {CAlert},
+	components: { CAlert },
 	props: {},
 	data() {
-        const answerArr = ['apple', 'banana', 'Orange', 'Grape', 'Strawberry', 'Mango', 'Pineapple', 'Watermelon', 'cherry', 'kiwi'];
-        const answerI = Math.floor(Math.random() * answerArr.length);
+		this.getDate();
+		const answerArr = [
+			"apple",
+			"banana",
+			"Orange",
+			"Grape",
+			"Strawberry",
+			"Mango",
+			"Pineapple",
+			"Watermelon",
+			"cherry",
+			"kiwi",
+		];
+		const answerI = Math.floor(Math.random() * answerArr.length);
 		const answer = answerArr[answerI].toUpperCase();
-		const answerTemp = Array.from(answer, () => '');
+		const answerTemp = Array.from(answer, () => "");
 		const alphabetArr = Array.from({ length: 26 }, (_, index) =>
 			String.fromCharCode("A".charCodeAt(0) + index)
 		).map((d) => {
@@ -30,10 +42,10 @@ export default defineComponent({
 			answerTemp: answerTemp,
 			alphabet: alphabetArr,
 			ctx: {} as any,
-            params: {
-                text: '정답입니다.',
-            },
-            isAlert: false,
+			params: {
+				text: "정답입니다.",
+			},
+			isAlert: false,
 		};
 	},
 	mounted() {
@@ -47,6 +59,20 @@ export default defineComponent({
 		this.ctx.stroke();
 	},
 	methods: {
+		async getDate(): Promise<any> {
+			const response = fetch(
+				"https://main--taupe-beijinho-5f10a6.netlify.app/.netlify/functions/rand-word",
+				{
+					method: "get",
+				}
+			).then((d) => d.json()) as any;
+			console.log(response);
+			if (response.success !== true) {
+				return;
+			}
+			this.answer = response.data;
+			this.answerTemp = Array.from(this.answer, () => "");
+		},
 		drawHangman() {
 			if (this.incorrectAttempts >= 1) {
 				// 긴줄
@@ -115,27 +141,23 @@ export default defineComponent({
 				data.isPass = false;
 				this.incorrectAttempts++;
 				this.drawHangman();
-                if (this.incorrectAttempts === 8) {
-                    this.params.text = '실패했습니다.';
-                    this.isAlert = true;
-                }
-                return;
+				if (this.incorrectAttempts === 8) {
+					this.params.text = "실패했습니다.";
+					this.isAlert = true;
+				}
+				return;
 			}
 
-            if (this.answerTemp.join('') === this.answer) {
-                this.isAlert = true;
-            }
+			if (this.answerTemp.join("") === this.answer) {
+				this.isAlert = true;
+			}
 		},
 	},
 });
 </script>
 
 <template>
-    <CAlert
-        v-bind:params="params"
-        v-if="isAlert"
-        @confirm="isAlert = !$event"
-    />
+	<CAlert v-bind:params="params" v-if="isAlert" @confirm="isAlert = !$event" />
 	<section>
 		<h1 class="mt-7 pt-6">행맨</h1>
 		<canvas
