@@ -60,16 +60,17 @@ export default defineComponent({
 	},
 	methods: {
 		async getDate(): Promise<any> {
-			const response = fetch(
+			const response = (await fetch(
 				"https://main--taupe-beijinho-5f10a6.netlify.app/.netlify/functions/rand-word",
 				{
 					method: "get",
 				}
-			).then((d) => d.json()) as any;
+			).then((d) => d.json())) as any;
 			console.log(response);
 			if (response.success !== true) {
 				return;
 			}
+
 			this.answer = response.data;
 			this.answerTemp = Array.from(this.answer, () => "");
 		},
@@ -130,13 +131,17 @@ export default defineComponent({
 				this.ctx.stroke();
 			}
 		},
+
 		checkAnswer(data: IalphabetProps) {
+			console.log(this.answer);
+
 			[...this.answer].filter((d, i) => {
-				if (data.letter === d) {
+				if (data.letter.toLowerCase() === d.toLowerCase()) {
 					data.isPass = true;
 					this.answerTemp[i] = d;
 				}
 			});
+
 			if (!data.isPass) {
 				data.isPass = false;
 				this.incorrectAttempts++;
@@ -147,7 +152,6 @@ export default defineComponent({
 				}
 				return;
 			}
-
 			if (this.answerTemp.join("") === this.answer) {
 				this.isAlert = true;
 			}
