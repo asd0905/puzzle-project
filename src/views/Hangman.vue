@@ -1,6 +1,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import CAlert from "../components/CAlert.vue";
+import CLoading from "../components/CLoading.vue";
 
 export interface IalphabetProps {
 	letter: string;
@@ -9,7 +10,7 @@ export interface IalphabetProps {
 
 export default defineComponent({
 	name: "Hanman",
-	components: { CAlert },
+	components: { CAlert, CLoading },
 	props: {},
 	data() {
 		this.getDate();
@@ -48,6 +49,7 @@ export default defineComponent({
 			},
 			isAlert: false,
 			canvas: {} as any,
+			isLoading: false,
 		};
 	},
 	mounted() {
@@ -62,19 +64,26 @@ export default defineComponent({
 	},
 	methods: {
 		async getDate(): Promise<any> {
-			const response = (await fetch(
-				"https://main--taupe-beijinho-5f10a6.netlify.app/.netlify/functions/rand-word",
-				{
-					method: "get",
+			try {
+				this.isLoading = true;
+				const response = (await fetch(
+					"https://main--taupe-beijinho-5f10a6.netlify.app/.netlify/functions/rand-word",
+					{
+						method: "get",
+					}
+				).then((d) => d.json())) as any;
+				console.log(response);
+				if (response.success !== true) {
+					this.isLoading = false;
+					return;
 				}
-			).then((d) => d.json())) as any;
-			console.log(response);
-			if (response.success !== true) {
-				return;
-			}
 
-			this.answer = response.data.toUpperCase();
-			this.answerTemp = Array.from(this.answer, () => "");
+				this.answer = response.data.toUpperCase();
+				this.answerTemp = Array.from(this.answer, () => "");
+				this.isLoading = false;
+			} catch (e) {
+				this.isLoading = false;
+			}
 		},
 
 		drawHangman() {
@@ -187,6 +196,7 @@ export default defineComponent({
 </script>
 
 <template>
+	<c-loading v-show="isLoading" />
 	<CAlert v-bind:params="params" v-if="isAlert" @confirm="confirm" />
 	<section class="mt-10">
 		<canvas
