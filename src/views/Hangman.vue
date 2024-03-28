@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
-import CAlert from "@/components/CAlert.vue";
+import CAlert from "../components/CAlert.vue";
 
 export interface IalphabetProps {
 	letter: string;
@@ -36,6 +36,7 @@ export default defineComponent({
 				isPass: undefined,
 			};
 		});
+
 		return {
 			incorrectAttempts: 0,
 			answer: answer,
@@ -46,14 +47,15 @@ export default defineComponent({
 				text: "정답입니다.",
 			},
 			isAlert: false,
+			canvas: {} as any,
 		};
 	},
 	mounted() {
-		const canvas = this.$refs.hangmanCanvas as any; // ref로부터 canvas 요소 가져오기
-		if (!canvas) {
+		this.canvas = this.$refs.hangmanCanvas as any; // ref로부터 canvas 요소 가져오기
+		if (!this.canvas) {
 			return;
 		}
-		this.ctx = canvas.getContext("2d"); // 옵셔널 체이닝 연산자 사용
+		this.ctx = this.canvas.getContext("2d"); // 옵셔널 체이닝 연산자 사용
 		this.ctx.moveTo(20, 0);
 		this.ctx.lineTo(20, 200);
 		this.ctx.stroke();
@@ -71,9 +73,10 @@ export default defineComponent({
 				return;
 			}
 
-			this.answer = response.data;
+			this.answer = response.data.toUpperCase();
 			this.answerTemp = Array.from(this.answer, () => "");
 		},
+
 		drawHangman() {
 			if (this.incorrectAttempts >= 1) {
 				// 긴줄
@@ -81,12 +84,14 @@ export default defineComponent({
 				this.ctx.lineTo(150, 0);
 				this.ctx.stroke();
 			}
+
 			if (this.incorrectAttempts >= 2) {
 				// 짧은 줄
 				this.ctx.moveTo(100, 0);
 				this.ctx.lineTo(100, 20);
 				this.ctx.stroke();
 			}
+
 			if (this.incorrectAttempts >= 3) {
 				// Head
 				this.ctx.beginPath();
@@ -133,8 +138,6 @@ export default defineComponent({
 		},
 
 		checkAnswer(data: IalphabetProps) {
-			console.log(this.answer);
-
 			[...this.answer].filter((d, i) => {
 				if (data.letter.toLowerCase() === d.toLowerCase()) {
 					data.isPass = true;
@@ -153,17 +156,39 @@ export default defineComponent({
 				return;
 			}
 			if (this.answerTemp.join("") === this.answer) {
+				this.params.text = "정답입니다.";
 				this.isAlert = true;
 			}
+		},
+
+		resetCanvas() {
+			this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+			this.ctx.beginPath();
+			this.ctx.moveTo(20, 0);
+			this.ctx.lineTo(20, 200);
+			this.ctx.stroke();
+			this.incorrectAttempts = 0;
+		},
+
+		resetAlphabet() {
+			for (const d of this.alphabet) {
+				d.isPass = undefined;
+			}
+		},
+
+		confirm(data: boolean) {
+			this.isAlert = !data;
+			this.resetCanvas();
+			this.resetAlphabet();
+			this.getDate();
 		},
 	},
 });
 </script>
 
 <template>
-	<CAlert v-bind:params="params" v-if="isAlert" @confirm="isAlert = !$event" />
-	<section>
-		<h1 class="mt-7 pt-6">행맨</h1>
+	<CAlert v-bind:params="params" v-if="isAlert" @confirm="confirm" />
+	<section class="mt-10">
 		<canvas
 			class="mx-auto"
 			ref="hangmanCanvas"
@@ -197,7 +222,7 @@ export default defineComponent({
 	</section>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .input-box {
 	display: flex;
 	flex-wrap: wrap;
@@ -208,6 +233,7 @@ export default defineComponent({
 	border-bottom: 1px solid black;
 	max-width: 8%;
 	text-align: center;
+	background-color: transparent;
 }
 .letter-box {
 	display: flex;
@@ -218,18 +244,35 @@ export default defineComponent({
 		margin: 1%;
 		display: block;
 		background-color: hsla(160, 100%, 37%, 0.4);
+		min-width: 52px;
 		color: #fff;
 		padding: 14px 20px;
 		border-radius: 10px;
 		&:hover {
 			background-color: hsla(160, 100%, 37%, 1);
 		}
+
 		&.fail {
 			background-color: gray;
+			@extend .vibration;
 		}
 		&.pass {
 			background-color: hsla(160, 100%, 37%, 1);
+			@extend .vibration;
 		}
+	}
+}
+.vibration {
+	animation-name: vibration;
+	animation-duration: 0.15s;
+	animation-iteration-count: 3;
+}
+@keyframes vibration {
+	from {
+		transform: rotate(5eg);
+	}
+	to {
+		transform: rotate(-5deg);
 	}
 }
 </style>
